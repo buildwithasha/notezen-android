@@ -1,6 +1,5 @@
-package com.asha.notezen.ui.theme
+package com.asha.notezen.presentation.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

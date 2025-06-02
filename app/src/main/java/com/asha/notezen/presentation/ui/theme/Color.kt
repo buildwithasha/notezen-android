@@ -1,4 +1,4 @@
-package com.asha.notezen.ui.theme
+package com.asha.notezen.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

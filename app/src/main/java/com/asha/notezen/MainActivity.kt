@@ -7,41 +7,50 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.asha.notezen.ui.theme.NoteZenTheme
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.asha.notezen.presentation.screens.addnote.AddNoteScreen
+import com.asha.notezen.presentation.screens.notelist.NoteListScreen
+import com.asha.notezen.presentation.ui.theme.NoteZenTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             NoteZenTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                val navController = rememberNavController()
+                NoteAppNavHost(navController)
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    @Composable
+    fun NoteAppNavHost(navController: NavHostController) {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NoteZenTheme {
-        Greeting("Android")
+            NavHost(
+                navController = navController, startDestination = "note_list",
+                modifier = Modifier.padding(innerPadding)
+            ) {
+
+                composable("note_list") {
+                    NoteListScreen(navController)
+                }
+
+                composable("add_note") {
+                    AddNoteScreen(navController)
+                }
+            }
+
+        }
+
     }
+
 }
