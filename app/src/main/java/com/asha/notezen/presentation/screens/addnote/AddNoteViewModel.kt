@@ -3,6 +3,8 @@ package com.asha.notezen.presentation.screens.addnote
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asha.notezen.domain.model.Note
@@ -34,6 +36,12 @@ class AddNoteViewModel @Inject constructor(
         content = newContent
     }
 
+    var selectedColor by mutableStateOf(Color.White.toArgb()) // default
+        private set
+
+    fun onColorSelected(color: Int) {
+        selectedColor = color
+    }
     fun saveNote() {
         if (title.isBlank() && content.isBlank()) return
         viewModelScope.launch {
@@ -42,7 +50,7 @@ class AddNoteViewModel @Inject constructor(
                     title = title,
                     content = content,
                     timestamp = System.currentTimeMillis(),
-                    colorHex = "#FFFFFF"
+                    colorHex = String.format("#%06X", 0xFFFFFF and selectedColor)
                 )
             )
             saveSuccess = true
