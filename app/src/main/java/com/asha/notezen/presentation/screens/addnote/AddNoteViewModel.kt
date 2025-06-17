@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.asha.notezen.domain.model.Note
 import com.asha.notezen.domain.usecase.NoteUseCases
+import com.asha.notezen.presentation.ui.theme.noteColors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,12 +37,19 @@ class AddNoteViewModel @Inject constructor(
         content = newContent
     }
 
-    var selectedColor by mutableStateOf(Color.White.toArgb()) // default
+    var selectedColorIndex by mutableStateOf(0)
         private set
 
-    fun onColorSelected(color: Int) {
-        selectedColor = color
+    val selectedColor: Color
+        get() = noteColors[selectedColorIndex]
+
+    val selectedColorHex: String
+        get() = String.format("#%06X", 0xFFFFFF and selectedColor.toArgb())
+
+    fun onColorSelected(index: Int) {
+        selectedColorIndex = index
     }
+
     fun saveNote() {
         if (title.isBlank() && content.isBlank()) return
         viewModelScope.launch {
@@ -50,7 +58,7 @@ class AddNoteViewModel @Inject constructor(
                     title = title,
                     content = content,
                     timestamp = System.currentTimeMillis(),
-                    colorHex = String.format("#%06X", 0xFFFFFF and selectedColor)
+                    colorHex = selectedColorHex
                 )
             )
             saveSuccess = true

@@ -22,10 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.asha.notezen.presentation.ui.theme.noteColors
 
 @Composable
 fun AddNoteScreen(navController: NavController, viewModel: AddNoteViewModel = hiltViewModel()) {
@@ -46,16 +46,10 @@ fun AddNoteScreen(navController: NavController, viewModel: AddNoteViewModel = hi
             .padding(16.dp)
     ) {
 
-        val colors = listOf(
-            Color(0xFFFFCDD2), // red
-            Color(0xFFFFF9C4), // yellow
-            Color(0xFFC8E6C9), // green
-            Color(0xFFBBDEFB), // blue
-            Color(0xFFD1C4E9)  // purple
-        )
+
 
         Row(modifier = Modifier.padding(vertical = 12.dp)) {
-            colors.forEach { color ->
+            noteColors.forEachIndexed { index, color ->
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -63,12 +57,12 @@ fun AddNoteScreen(navController: NavController, viewModel: AddNoteViewModel = hi
                         .clip(CircleShape)
                         .background(color)
                         .border(
-                            width = if (viewModel.selectedColor == color.toArgb()) 3.dp else 1.dp,
-                            color = if (viewModel.selectedColor == color.toArgb()) Color.Black else Color.Gray,
+                            width = if (viewModel.selectedColorIndex == index) 3.dp else 1.dp,
+                            color = if (viewModel.selectedColorIndex == index) Color.Black else Color.Gray,
                             shape = CircleShape
                         )
                         .clickable {
-                            viewModel.onColorSelected(color.toArgb())
+                            viewModel.onColorSelected(index)
                         }
                 )
             }
