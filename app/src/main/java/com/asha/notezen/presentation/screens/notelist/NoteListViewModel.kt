@@ -7,6 +7,7 @@ import com.asha.notezen.domain.usecase.NoteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,14 +16,17 @@ class NoteListViewModel @Inject constructor(
     private val noteUseCases: NoteUseCases
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<List<Note>>(emptyList())
-    val state: StateFlow<List<Note>> = _state
+    private val _uiState = MutableStateFlow(NoteListUiState())
+    val uiState: StateFlow<NoteListUiState> = _uiState
 
     init {
+        getAllNotes()
+    }
+
+    private fun getAllNotes() {
         viewModelScope.launch {
             noteUseCases.getNotes().collect { notes ->
-                _state.value = notes
-
+                _uiState.update { it.copy(notes = notes) }
             }
         }
     }

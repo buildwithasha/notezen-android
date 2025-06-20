@@ -32,88 +32,97 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.core.graphics.toColorInt
 import com.asha.notezen.domain.model.Note
+import com.asha.notezen.presentation.navigation.Screen
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NoteListScreen(navController: NavController, viewModel: NoteListViewModel = hiltViewModel()) {
-
-    val noteList by viewModel.state.collectAsState()
-
+fun NoteListScreen(
+    navController: NavController,
+    viewModel: NoteListViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsState()
     var noteToDelete by remember { mutableStateOf<Note?>(null) }
 
-    //Show confirmation dialog if noteToDelete != null
-
+    // Delete Confirmation Dialog
     noteToDelete?.let { note ->
         AlertDialog(
             onDismissRequest = { noteToDelete = null },
             title = { Text("Delete Note") },
-            text = { Text("Are you sure you want to delete the note?") },
+            text = { Text("Are you sure you want to delete this note?") },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteNote(note)
                     noteToDelete = null
-                }) {
-                    Text("Delete")
-                }
+                }) { Text("Delete") }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    noteToDelete = null
-                }) {
+                TextButton(onClick = { noteToDelete = null }) {
                     Text("Cancel")
                 }
             }
         )
     }
 
-    Scaffold(floatingActionButton = {
-        FloatingActionButton(onClick = { navController.navigate("add_note") }) {
-            Icon(Icons.Default.Add, contentDescription = "Add Note")
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                navController.navigate(Screen.AddNote.route)
+            }) {
+                Icon(Icons.Default.Add, contentDescription = "Add Note")
+            }
         }
-    }) {
-        LazyColumn(modifier = Modifier.padding(it)) {
-            items(noteList) { note ->
+    ) { padding ->
+        LazyColumn(modifier = Modifier.padding(padding)) {
+            items(state.notes) { note ->
+                NoteItem(
+                    note = note,
+                    onClick = {
+                        navController.navigate(Screen.AddNote.passNoteId(note.id))
+                    },
+                    onLongClick = { noteToDelete = note }
+                )
+            }
+        }
+    }
+}
 
-                val noteColor = Color(note.colorHex.toColorInt())
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun NoteItem(
+    note: Note,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
+) {
+    val noteColor = Color(note.colorHex.toColorInt())
 
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .fillMaxWidth()
-                        .combinedClickable (
-                            onClick = {
-
-                        }, onLongClick = {
-                            noteToDelete = note
-                            }
-                        ),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = noteColor)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-
-                        Text(
-                            text = note.title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        if (note.content.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = note.content,
-                                color = MaterialTheme.colorScheme.onSecondary
-                            )
-                        }
-
-                    }
-
-                }
-
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = noteColor)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = note.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            if (note.content.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = note.content,
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
             }
         }
     }

@@ -26,4 +26,10 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun deleteNote(note: Note) {
         dao.deleteNote(note.toEntity())
     }
+
+    override fun getNoteById(id: Int): Flow<Note?> {
+        return dao.getNoteById(id).map {
+            it?.toDomain()
+        }
+    }
 }

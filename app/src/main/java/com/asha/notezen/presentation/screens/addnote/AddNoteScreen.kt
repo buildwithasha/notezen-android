@@ -28,13 +28,17 @@ import androidx.navigation.NavController
 import com.asha.notezen.presentation.ui.theme.noteColors
 
 @Composable
-fun AddNoteScreen(navController: NavController, viewModel: AddNoteViewModel = hiltViewModel()) {
+fun AddNoteScreen(
+    navController: NavController,
+    viewModel: AddNoteViewModel = hiltViewModel()
+) {
+    val state = viewModel.uiState
 
-    val title = viewModel.title
-    val content = viewModel.content
-    val saveSuccess = viewModel.saveSuccess
+    LaunchedEffect(Unit) {
+        viewModel.loadNoteIfAvailable()
+    }
 
-    if (saveSuccess) {
+    if (state.saveSuccess) {
         LaunchedEffect(Unit) {
             navController.popBackStack()
         }
@@ -45,9 +49,7 @@ fun AddNoteScreen(navController: NavController, viewModel: AddNoteViewModel = hi
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
-
-
+        // Color Bubbles
         Row(modifier = Modifier.padding(vertical = 12.dp)) {
             noteColors.forEachIndexed { index, color ->
                 Box(
@@ -57,34 +59,42 @@ fun AddNoteScreen(navController: NavController, viewModel: AddNoteViewModel = hi
                         .clip(CircleShape)
                         .background(color)
                         .border(
-                            width = if (viewModel.selectedColorIndex == index) 3.dp else 1.dp,
-                            color = if (viewModel.selectedColorIndex == index) Color.Black else Color.Gray,
+                            width = if (state.selectedColorIndex == index) 3.dp else 1.dp,
+                            color = if (state.selectedColorIndex == index) Color.Black else Color.Gray,
                             shape = CircleShape
                         )
-                        .clickable {
-                            viewModel.onColorSelected(index)
-                        }
+                        .clickable { viewModel.onColorSelected(index) }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(value = title, onValueChange = viewModel::onTitleChange, label = {
-            Text(
-                "Title"
-            )
-        }, modifier = Modifier.fillMaxWidth())
+        // Title Field
+        OutlinedTextField(
+            value = state.title,
+            onValueChange = viewModel::onTitleChange,
+            label = { Text("Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(value = content, onValueChange = viewModel::onContentChanged, label = {
-            Text(text = "Content")
-        }, modifier = Modifier.fillMaxWidth())
+        // Content Field
+        OutlinedTextField(
+            value = state.content,
+            onValueChange = viewModel::onContentChanged,
+            label = { Text("Content") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(onClick = { viewModel.saveNote() }, modifier = Modifier.align(Alignment.End)) {
+        // Save Button
+        Button(
+            onClick = { viewModel.saveNote() },
+            modifier = Modifier.align(Alignment.End)
+        ) {
             Text("Save")
         }
     }
