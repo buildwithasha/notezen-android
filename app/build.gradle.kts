@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.navigation.compose)
+    implementation(libs.material.icons.extended)
 
     // Room (with KSP)
     implementation(libs.androidx.room.runtime)

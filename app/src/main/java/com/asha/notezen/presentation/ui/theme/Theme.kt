@@ -8,12 +8,18 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color.White,
+    onPrimary = Color.Black,
+    secondary = Color.Gray,
+    onSecondary = Color.White,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color(0xFF121212),
+    onSurface = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -35,8 +41,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun NoteZenTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
