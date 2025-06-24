@@ -8,5 +8,6 @@ data class NoteListUiState(
     val notes: List<Note> = emptyList(),
     val sortType: SortType = SortType.DATE,
     val sortOrder: SortOrder = SortOrder.DESCENDING,
-    val isSortSectionVisible: Boolean = false
+    val isSortSectionVisible: Boolean = false,
+    val searchQuery: String = ""
 )

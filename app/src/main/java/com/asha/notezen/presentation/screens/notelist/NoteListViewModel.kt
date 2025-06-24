@@ -9,6 +9,8 @@ import com.asha.notezen.domain.util.SortType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,22 +23,30 @@ class NoteListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(NoteListUiState())
     val uiState: StateFlow<NoteListUiState> = _uiState
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
 
     init {
-        getAllNotes()
+        observeNotes()
     }
 
-    private fun getAllNotes() {
+    private fun observeNotes() {
         viewModelScope.launch {
-            noteUseCases.getNotes().collect { notes ->
-                _uiState.update {
-                    val sorted = sortList(
-                        notes = notes,
-                        type = it.sortType,
-                        order = it.sortOrder
-                    )
-                    it.copy(notes = sorted)
-                }
+            combine(
+                noteUseCases.getNotes(),
+                searchQuery,
+                _uiState.map { it.sortType },
+                _uiState.map { it.sortOrder }
+            ) { notes, query, sortType, sortOrder ->
+                noteUseCases.filterAndSortNotes(
+                    notes = notes,
+                    query = query,
+                    sortType = sortType,
+                    sortOrder = sortOrder
+                )
+            }.collect { result ->
+                _uiState.update { it.copy(notes = result) }
             }
         }
     }
@@ -51,33 +61,36 @@ class NoteListViewModel @Inject constructor(
         _uiState.update { it.copy(isSortSectionVisible = !it.isSortSectionVisible) }
     }
 
-    fun updateSort(type: SortType? = null, order: SortOrder? = null) {
-        _uiState.update {
-            val newSortType = type ?: it.sortType
-            val newSortOrder = order ?: it.sortOrder
-            val sortedNotes = sortList(it.notes, newSortType, newSortOrder)
-            it.copy(
-                sortType = newSortType,
-                sortOrder = newSortOrder,
-                notes = sortedNotes
-            )
-        }
-    }
-
     fun hideSortSection() {
         _uiState.update { it.copy(isSortSectionVisible = false) }
     }
 
-    private fun sortList(
-        notes: List<Note>,
-        type: SortType,
-        order: SortOrder
-    ): List<Note> {
-        val sorted = when (type) {
-            SortType.TITLE -> notes.sortedBy { it.title.lowercase() }
-            SortType.DATE -> notes.sortedBy { it.timestamp }
-            SortType.COLOR -> notes.sortedBy { it.colorHex }
-        }
-        return if (order == SortOrder.DESCENDING) sorted.reversed() else sorted
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
     }
-}
+
+    fun updateSort(type: SortType? = null, order: SortOrder? = null) {
+        _uiState.update {
+            it.copy(
+                sortType = type ?: it.sortType,
+                sortOrder = order ?: it.sortOrder
+            )
+        }
+        applyFiltersAndSort()
+    }
+
+    private fun applyFiltersAndSort() {
+            viewModelScope.launch {
+                noteUseCases.getNotes().collect { notes ->
+                    val sorted = noteUseCases.filterAndSortNotes(
+                        notes = notes,
+                        query = _uiState.value.searchQuery,
+                        sortType = _uiState.value.sortType,
+                        sortOrder = _uiState.value.sortOrder
+                    )
+                    _uiState.update { it.copy(notes = sorted) }
+                }
+            }
+        }
+    }
