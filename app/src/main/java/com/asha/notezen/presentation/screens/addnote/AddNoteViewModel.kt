@@ -27,7 +27,7 @@ class AddNoteViewModel @Inject constructor(
     private val _uiState = mutableStateOf(AddNoteUiState())
     val uiState: AddNoteUiState get() = _uiState.value
 
-    fun onTitleChange(newTitle: String) {
+    fun onTitleChanged(newTitle: String) {
         _uiState.value = _uiState.value.copy(title = newTitle)
     }
 
@@ -68,7 +68,10 @@ class AddNoteViewModel @Inject constructor(
                 title = current.title,
                 content = current.content,
                 timestamp = System.currentTimeMillis(),
-                colorHex = String.format("#%06X", 0xFFFFFF and noteColors[current.selectedColorIndex].toArgb())
+                colorHex = String.format(
+                    "#%06X",
+                    0xFFFFFF and noteColors[current.selectedColorIndex].toArgb()
+                )
             )
             noteUseCases.addNote(note)
             _uiState.value = current.copy(saveSuccess = true)
