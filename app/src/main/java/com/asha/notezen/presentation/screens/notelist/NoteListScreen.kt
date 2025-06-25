@@ -9,9 +9,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -232,22 +234,39 @@ fun NoteListScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp)
-            ) {
-                items(uiState.notes) { note ->
-                    NoteCard(
-                        note = note,
-                        onDelete = { viewModel.deleteNote(note) },
-                        onClick = {
-                            navController.navigate(Screen.AddNote.passNoteId(note.id))
-                        }
+            if (uiState.notes.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 80.dp), 
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No results found",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.Gray)
                     )
                 }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    items(uiState.notes) { note ->
+                        NoteCard(
+                            note = note,
+                            onDelete = { viewModel.deleteNote(note) },
+                            onClick = {
+                                navController.navigate(Screen.AddNote.passNoteId(note.id))
+                            },
+                            onTogglePin = { viewModel.togglePin(it) }
+                        )
+                    }
+                }
+            }
+
             }
         }
     }
-}
+

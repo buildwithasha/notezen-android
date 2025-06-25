@@ -9,4 +9,5 @@ interface NoteRepository {
     suspend fun insertNote(note: Note)
     suspend fun deleteNote(note: Note)
     fun getNoteById(id: Int): Flow<Note?>
+    fun getNotesOrderedWithPinned(): Flow<List<Note>>
 }

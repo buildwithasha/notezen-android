@@ -13,7 +13,7 @@ data class NoteUseCases(
 )
 
 class GetNotesUseCase(private val repository: NoteRepository) {
-    operator fun invoke(): Flow<List<Note>> = repository.getNotes()
+    operator fun invoke(): Flow<List<Note>> = repository.getNotesOrderedWithPinned()
 }
 
 class AddNoteUseCase(private val repository: NoteRepository) {

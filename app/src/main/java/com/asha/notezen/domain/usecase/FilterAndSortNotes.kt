@@ -19,13 +19,15 @@ class FilterAndSortNotes {
                         it.content.contains(query, ignoreCase = true)
             }
         }
-
-        val sorted = when (sortType) {
-            SortType.TITLE -> filtered.sortedBy { it.title.lowercase() }
-            SortType.DATE -> filtered.sortedBy { it.timestamp }
-            SortType.COLOR -> filtered.sortedBy { it.colorHex }
-        }
-
-        return if (sortOrder == SortOrder.DESCENDING) sorted.reversed() else sorted
+        return filtered.sortedWith(
+            compareByDescending<Note> { it.isPinned }.thenComparator { a, b ->
+                val result = when (sortType) {
+                    SortType.TITLE -> a.title.lowercase().compareTo(b.title.lowercase())
+                    SortType.DATE -> a.timestamp.compareTo(b.timestamp)
+                    SortType.COLOR -> a.colorHex.compareTo(b.colorHex)
+                }
+                if (sortOrder == SortOrder.DESCENDING) -result else result
+            }
+        )
     }
 }

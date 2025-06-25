@@ -13,11 +13,9 @@ class NoteRepositoryImpl @Inject constructor(
     private val dao: NoteDao
 ) : NoteRepository {
 
-    override fun getNotes(): Flow<List<Note>> = dao.getAllNotes().map { list ->
-        list.map {
-            it.toDomain()
-        }
-    }
+    override fun getNotes(): Flow<List<Note>> =
+        dao.getNotesOrderedWithPinned().map { it.map { entity -> entity.toDomain() } }
+
 
     override suspend fun insertNote(note: Note) {
         dao.insertNote(note.toEntity())
@@ -32,4 +30,12 @@ class NoteRepositoryImpl @Inject constructor(
             it?.toDomain()
         }
     }
+
+    override fun getNotesOrderedWithPinned(): Flow<List<Note>> = dao.getNotesOrderedWithPinned().map { list ->
+        list.map {
+            it.toDomain()
+        }
+
+    }
+
 }

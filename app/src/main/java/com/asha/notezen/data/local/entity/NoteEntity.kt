@@ -1,5 +1,6 @@
 package com.asha.notezen.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,5 +10,8 @@ data class NoteEntity(
     val title: String,
     val content: String,
     val timestamp: Long,
-    val colorHex: String
+    val colorHex: String,
+
+    @ColumnInfo(defaultValue = "0")
+    val isPinned: Boolean = false
 )

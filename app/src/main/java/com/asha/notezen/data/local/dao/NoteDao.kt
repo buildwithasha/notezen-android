@@ -21,4 +21,7 @@ interface NoteDao {
 
     @Query("SELECT * FROM notes WHERE id = :id")
     fun getNoteById(id: Int): Flow<NoteEntity?>
+
+    @Query("SELECT * FROM notes ORDER BY isPinned DESC, timestamp DESC")
+    fun getNotesOrderedWithPinned(): Flow<List<NoteEntity>>
 }

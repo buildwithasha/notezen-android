@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -35,11 +37,13 @@ fun NoteCard(
     note: Note,
     onDelete: () -> Unit,
     onClick: () -> Unit,
+    onTogglePin: (Note) -> Unit,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 12.dp
 ) {
     val backgroundColor = Color(note.colorHex.toColorInt())
     val textColor = if (backgroundColor.luminance() < 0.5f) Color.White else Color.Black
+
 
     Box(
         modifier = modifier
@@ -56,12 +60,31 @@ fun NoteCard(
         ) {
             Box {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = note.title,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = textColor
-                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = note.title,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = textColor,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        val pinIcon =
+                            if (note.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin
+
+                        Icon(
+                            imageVector = pinIcon,
+                            contentDescription = if (note.isPinned) "Unpin Note" else "Pin Note",
+                            tint = textColor.copy(alpha = 0.8f),
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable { onTogglePin(note) }
+                        )
+                    }
 
                     if (note.content.isNotBlank()) {
                         Spacer(modifier = Modifier.height(8.dp))

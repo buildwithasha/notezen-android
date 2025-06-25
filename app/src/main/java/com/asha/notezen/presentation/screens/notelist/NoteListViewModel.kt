@@ -68,6 +68,7 @@ class NoteListViewModel @Inject constructor(
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
+        _uiState.update { it.copy(searchQuery = query) }
     }
 
     fun updateSort(type: SortType? = null, order: SortOrder? = null) {
@@ -77,20 +78,13 @@ class NoteListViewModel @Inject constructor(
                 sortOrder = order ?: it.sortOrder
             )
         }
-        applyFiltersAndSort()
+
     }
 
-    private fun applyFiltersAndSort() {
-            viewModelScope.launch {
-                noteUseCases.getNotes().collect { notes ->
-                    val sorted = noteUseCases.filterAndSortNotes(
-                        notes = notes,
-                        query = _uiState.value.searchQuery,
-                        sortType = _uiState.value.sortType,
-                        sortOrder = _uiState.value.sortOrder
-                    )
-                    _uiState.update { it.copy(notes = sorted) }
-                }
-            }
+    fun togglePin(note: Note) {
+        viewModelScope.launch {
+            val updatedNote = note.copy(isPinned = !note.isPinned)
+            noteUseCases.addNote(updatedNote)
         }
+    }
     }
