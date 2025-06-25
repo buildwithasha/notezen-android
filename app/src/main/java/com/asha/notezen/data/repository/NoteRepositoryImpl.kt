@@ -38,4 +38,7 @@ class NoteRepositoryImpl @Inject constructor(
 
     }
 
+    override fun getArchivedNotes(): Flow<List<Note>> =
+        dao.getArchivedNotes().map { list -> list.map { it.toDomain() } }
+
 }

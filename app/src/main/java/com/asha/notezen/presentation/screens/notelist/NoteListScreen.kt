@@ -6,7 +6,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -27,16 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.asha.notezen.presentation.navigation.Screen
+import com.asha.notezen.presentation.screens.composables.CommonTopBar
 import com.asha.notezen.presentation.screens.notelist.composables.EmptyStateMessage
 import com.asha.notezen.presentation.screens.notelist.composables.FABColumn
 import com.asha.notezen.presentation.screens.notelist.composables.NoteSection
-import com.asha.notezen.presentation.screens.notelist.composables.NotesTopBar
 import com.asha.notezen.presentation.screens.notelist.composables.SearchBar
 import com.asha.notezen.presentation.screens.notelist.composables.SortSection
 import kotlinx.coroutines.launch
 
-
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteListScreen(
     navController: NavController,
@@ -82,9 +79,12 @@ fun NoteListScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            NotesTopBar(
-                isSortSectionVisible = uiState.isSortSectionVisible,
-                onToggleSort = { viewModel.toggleSortSection() }
+            CommonTopBar(
+                title = "Your Notes",
+                showSortIcon = true,
+                onToggleSort = { viewModel.toggleSortSection() },
+                showArchiveIcon = true,
+                onArchiveClick = { navController.navigate(Screen.ArchivedNotes.route) }
             )
 
             AnimatedVisibility(
@@ -127,7 +127,8 @@ fun NoteListScreen(
                             navController.navigate(Screen.AddNote.passNoteId(note.id))
                         },
                         onDelete = viewModel::deleteNote,
-                        onTogglePin = viewModel::togglePin
+                        onTogglePin = viewModel::togglePin,
+                        onArchive = viewModel::archiveNote
                     )
 
                     NoteSection(
@@ -137,7 +138,8 @@ fun NoteListScreen(
                             navController.navigate(Screen.AddNote.passNoteId(note.id))
                         },
                         onDelete = viewModel::deleteNote,
-                        onTogglePin = viewModel::togglePin
+                        onTogglePin = viewModel::togglePin,
+                        onArchive = viewModel::archiveNote
                     )
                 }
 

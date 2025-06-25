@@ -16,7 +16,8 @@ fun LazyListScope.NoteSection(
     notes: List<Note>,
     onClick: (Note) -> Unit,
     onDelete: (Note) -> Unit,
-    onTogglePin: (Note) -> Unit
+    onTogglePin: (Note) -> Unit,
+    onArchive: (Note) -> Unit
 ) {
     if (notes.isNotEmpty()) {
         item {
@@ -35,7 +36,8 @@ fun LazyListScope.NoteSection(
                 note = note,
                 onDelete = { onDelete(note) },
                 onClick = { onClick(note) },
-                onTogglePin = { onTogglePin(note) }
+                onTogglePin = { onTogglePin(note) },
+                onToggleArchive = {onArchive(note)}
             )
         }
     }

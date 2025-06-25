@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
@@ -38,10 +40,12 @@ import java.util.Locale
 fun NoteCard(
     note: Note,
     onDelete: () -> Unit,
+    onToggleArchive: (Note) -> Unit,
     onClick: () -> Unit,
     onTogglePin: (Note) -> Unit,
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 12.dp
+    cornerRadius: Dp = 12.dp,
+    showPinIcon: Boolean = true
 ) {
     val backgroundColor = Color(note.colorHex.toColorInt())
     val textColor = if (backgroundColor.luminance() < 0.5f) Color.White else Color.Black
@@ -75,17 +79,32 @@ fun NoteCard(
                             modifier = Modifier.weight(1f)
                         )
 
-                        val pinIcon =
-                            if (note.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin
-
                         Icon(
-                            imageVector = pinIcon,
-                            contentDescription = if (note.isPinned) "Unpin Note" else "Pin Note",
-                            tint = textColor.copy(alpha = 0.8f),
+                            imageVector = Icons.Default.Archive,
+                            contentDescription = if (note.isArchived) "Unarchive Note" else "Archive Note",
+                            tint = if (note.isArchived)
+                                Color.White.copy(alpha = 0.8f)
+                            else
+                                textColor.copy(alpha = 0.8f),
                             modifier = Modifier
                                 .size(20.dp)
-                                .clickable { onTogglePin(note) }
+                                .clickable { onToggleArchive(note) }
                         )
+
+                        if (showPinIcon) {
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            val pinIcon =
+                                if (note.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin
+                            Icon(
+                                imageVector = pinIcon,
+                                contentDescription = if (note.isPinned) "Unpin Note" else "Pin Note",
+                                tint = textColor.copy(alpha = 0.8f),
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clickable { onTogglePin(note) }
+                            )
+                        }
                     }
 
                     if (note.content.isNotBlank()) {

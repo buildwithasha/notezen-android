@@ -6,5 +6,6 @@ data class Note(
     val content: String,
     val timestamp: Long,
     val colorHex: String,
-    val isPinned: Boolean = false
+    val isPinned: Boolean = false,
+    val isArchived: Boolean = false
 )

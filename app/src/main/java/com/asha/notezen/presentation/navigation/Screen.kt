@@ -9,4 +9,6 @@ sealed class Screen(val route: String) {
             return "${NavConstants.ADD_NOTE_ROUTE}?${NavConstants.ARG_NOTE_ID}=$noteId"
         }
     }
+
+    object ArchivedNotes : Screen(NavConstants.ARCHIVED_LIST_ROUTE)
 }

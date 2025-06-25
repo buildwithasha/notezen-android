@@ -87,4 +87,11 @@ class NoteListViewModel @Inject constructor(
             noteUseCases.addNote(updatedNote)
         }
     }
+
+    fun archiveNote(note: Note) {
+        viewModelScope.launch {
+            val archivedNote = note.copy(isArchived = true)
+            noteUseCases.addNote(archivedNote)
+        }
+    }
     }

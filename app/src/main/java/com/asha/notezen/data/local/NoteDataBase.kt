@@ -6,7 +6,7 @@ import com.asha.notezen.data.local.dao.NoteDao
 import com.asha.notezen.data.local.entity.NoteEntity
 
 @Database(
-    entities = [NoteEntity::class], version = 2, exportSchema = true
+    entities = [NoteEntity::class], version = 3, exportSchema = true
 )
 abstract class NoteDataBase : RoomDatabase() {
 

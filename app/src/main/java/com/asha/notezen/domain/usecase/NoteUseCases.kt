@@ -9,7 +9,8 @@ data class NoteUseCases(
     val addNote: AddNoteUseCase,
     val deleteNote: DeleteNoteUseCase,
     val getNoteById: GetNoteByIdUseCase,
-    val filterAndSortNotes: FilterAndSortNotesUseCase
+    val filterAndSortNotes: FilterAndSortNotesUseCase,
+    val getArchivedNotes: GetArchivedNotesUseCase
 )
 
 class GetNotesUseCase(private val repository: NoteRepository) {
@@ -27,4 +28,9 @@ class DeleteNoteUseCase(private val repository: NoteRepository) {
 class GetNoteByIdUseCase(private val repository: NoteRepository) {
     operator fun invoke(id: Int): Flow<Note?> = repository.getNoteById(id)
 }
+
+class GetArchivedNotesUseCase(private val repository: NoteRepository) {
+    operator fun invoke(): Flow<List<Note>> = repository.getArchivedNotes()
+}
+
 

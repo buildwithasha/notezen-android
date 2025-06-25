@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.asha.notezen.presentation.screens.addnote.AddNoteScreen
+import com.asha.notezen.presentation.screens.archivenotelist.composables.ArchivedNotesScreen
 import com.asha.notezen.presentation.screens.notelist.NoteListScreen
 
 
@@ -31,6 +32,10 @@ fun AppNavGraph(navController: NavHostController) {
             )
         ) {
             AddNoteScreen(navController = navController)
+        }
+
+        composable(Screen.ArchivedNotes.route) {
+            ArchivedNotesScreen(navController = navController)
         }
     }
 }

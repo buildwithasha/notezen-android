@@ -11,7 +11,9 @@ data class NoteEntity(
     val content: String,
     val timestamp: Long,
     val colorHex: String,
+    val isPinned: Boolean = false,
 
     @ColumnInfo(defaultValue = "0")
-    val isPinned: Boolean = false
+    val isArchived: Boolean = false
+
 )

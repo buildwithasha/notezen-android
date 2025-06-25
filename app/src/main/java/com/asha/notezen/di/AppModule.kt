@@ -9,6 +9,7 @@ import com.asha.notezen.domain.repository.NoteRepository
 import com.asha.notezen.domain.usecase.AddNoteUseCase
 import com.asha.notezen.domain.usecase.DeleteNoteUseCase
 import com.asha.notezen.domain.usecase.FilterAndSortNotesUseCase
+import com.asha.notezen.domain.usecase.GetArchivedNotesUseCase
 import com.asha.notezen.domain.usecase.GetNoteByIdUseCase
 import com.asha.notezen.domain.usecase.GetNotesUseCase
 import com.asha.notezen.domain.usecase.NoteUseCases
@@ -45,7 +46,8 @@ object AppModule {
         addNote = AddNoteUseCase(repository),
         deleteNote = DeleteNoteUseCase(repository),
         getNoteById = GetNoteByIdUseCase(repository),
-        filterAndSortNotes = FilterAndSortNotesUseCase()
+        filterAndSortNotes = FilterAndSortNotesUseCase(),
+        getArchivedNotes = GetArchivedNotesUseCase(repository)
     )
 
 }
