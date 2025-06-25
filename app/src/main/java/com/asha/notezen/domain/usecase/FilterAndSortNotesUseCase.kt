@@ -4,7 +4,7 @@ import com.asha.notezen.domain.model.Note
 import com.asha.notezen.domain.util.SortOrder
 import com.asha.notezen.domain.util.SortType
 
-class FilterAndSortNotes {
+class FilterAndSortNotesUseCase {
     operator fun invoke(
         notes: List<Note>,
         query: String,

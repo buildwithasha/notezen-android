@@ -9,7 +9,7 @@ data class NoteUseCases(
     val addNote: AddNoteUseCase,
     val deleteNote: DeleteNoteUseCase,
     val getNoteById: GetNoteByIdUseCase,
-    val filterAndSortNotes: FilterAndSortNotes
+    val filterAndSortNotes: FilterAndSortNotesUseCase
 )
 
 class GetNotesUseCase(private val repository: NoteRepository) {

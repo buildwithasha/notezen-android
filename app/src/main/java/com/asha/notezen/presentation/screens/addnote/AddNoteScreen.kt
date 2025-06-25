@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -31,10 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.asha.notezen.presentation.screens.composables.ColorPickerRow
+import com.asha.notezen.presentation.screens.addnote.composables.ColorPickerRow
+
 import com.asha.notezen.presentation.ui.theme.noteColors
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNoteScreen(
     navController: NavController,

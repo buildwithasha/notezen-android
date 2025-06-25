@@ -1,4 +1,4 @@
-package com.asha.notezen.presentation.screens.composables
+package com.asha.notezen.presentation.screens.notelist.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row

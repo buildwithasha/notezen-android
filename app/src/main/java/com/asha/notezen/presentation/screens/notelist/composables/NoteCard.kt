@@ -30,7 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.asha.notezen.domain.model.Note
-import com.asha.notezen.presentation.screens.notelist.formatDate
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun NoteCard(
@@ -121,4 +123,9 @@ fun NoteCard(
             }
         }
     }
+}
+
+fun formatDate(timestamp: Long): String {
+    val sdf = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
+    return sdf.format(Date(timestamp))
 }

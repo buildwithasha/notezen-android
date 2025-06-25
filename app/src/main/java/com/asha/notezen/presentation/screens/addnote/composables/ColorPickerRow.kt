@@ -1,4 +1,4 @@
-package com.asha.notezen.presentation.screens.composables
+package com.asha.notezen.presentation.screens.addnote.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
