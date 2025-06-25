@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -30,7 +29,7 @@ import androidx.navigation.NavController
 import com.asha.notezen.presentation.navigation.Screen
 import com.asha.notezen.presentation.screens.notelist.composables.EmptyStateMessage
 import com.asha.notezen.presentation.screens.notelist.composables.FABColumn
-import com.asha.notezen.presentation.screens.notelist.composables.NoteCard
+import com.asha.notezen.presentation.screens.notelist.composables.NoteSection
 import com.asha.notezen.presentation.screens.notelist.composables.NotesTopBar
 import com.asha.notezen.presentation.screens.notelist.composables.SearchBar
 import com.asha.notezen.presentation.screens.notelist.composables.SortSection
@@ -48,6 +47,9 @@ fun NoteListScreen(
     val listState = rememberLazyListState()
     val previousSize = remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
+
+    val pinnedNotes = uiState.notes.filter { it.isPinned }
+    val otherNotes = uiState.notes.filter { !it.isPinned }
 
     val showScrollToTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 3 }
@@ -118,20 +120,28 @@ fun NoteListScreen(
                         .weight(1f)
                         .padding(horizontal = 16.dp)
                 ) {
-                    items(uiState.notes) { note ->
-                        NoteCard(
-                            note = note,
-                            onDelete = { viewModel.deleteNote(note) },
-                            onClick = {
-                                navController.navigate(Screen.AddNote.passNoteId(note.id))
-                            },
-                            onTogglePin = { viewModel.togglePin(it) }
-                        )
-                    }
-                }
-            }
+                    NoteSection(
+                        title = "Pinned",
+                        notes = pinnedNotes,
+                        onClick = { note ->
+                            navController.navigate(Screen.AddNote.passNoteId(note.id))
+                        },
+                        onDelete = viewModel::deleteNote,
+                        onTogglePin = viewModel::togglePin
+                    )
 
+                    NoteSection(
+                        title = "Others",
+                        notes = otherNotes,
+                        onClick = { note ->
+                            navController.navigate(Screen.AddNote.passNoteId(note.id))
+                        },
+                        onDelete = viewModel::deleteNote,
+                        onTogglePin = viewModel::togglePin
+                    )
+                }
+
+            }
         }
     }
 }
-
