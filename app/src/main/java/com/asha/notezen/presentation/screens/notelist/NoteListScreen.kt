@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -62,8 +63,10 @@ fun NoteListScreen(
     }
 
 
+    val focusManager = LocalFocusManager.current
     BackHandler(enabled = searchQuery.isNotBlank()) {
         viewModel.onSearchQueryChanged("")
+        focusManager.clearFocus(force = true)
     }
 
     Scaffold(
