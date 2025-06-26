@@ -1,5 +1,6 @@
 package com.asha.notezen.presentation.screens.notelist
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -60,6 +61,11 @@ fun NoteListScreen(
         previousSize.intValue = uiState.notes.size
     }
 
+
+    BackHandler(enabled = searchQuery.isNotBlank()) {
+        viewModel.onSearchQueryChanged("")
+    }
+
     Scaffold(
         floatingActionButton = {
             FABColumn(
@@ -82,6 +88,7 @@ fun NoteListScreen(
             CommonTopBar(
                 title = "Your Notes",
                 showSortIcon = true,
+                isSortSectionVisible = uiState.isSortSectionVisible,
                 onToggleSort = { viewModel.toggleSortSection() },
                 showArchiveIcon = true,
                 onArchiveClick = { navController.navigate(Screen.ArchivedNotes.route) }

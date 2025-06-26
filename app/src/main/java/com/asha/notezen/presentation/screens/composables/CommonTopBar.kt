@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 fun CommonTopBar(
     title: String,
     showSortIcon: Boolean = false,
+    isSortSectionVisible: Boolean = false,
     onToggleSort: (() -> Unit)? = null,
     showArchiveIcon: Boolean = false,
     onArchiveClick: (() -> Unit)? = null,
@@ -31,7 +32,7 @@ fun CommonTopBar(
     onBackClick: (() -> Unit)? = null
 ) {
     val rotationAngle by animateFloatAsState(
-        targetValue = if (showSortIcon && onToggleSort != null) 180f else 0f,
+        targetValue = if (isSortSectionVisible) 180f else 0f, // <-- ANIMATE ON STATE
         animationSpec = tween(durationMillis = 300),
         label = "SortIconRotation"
     )
@@ -66,12 +67,6 @@ fun CommonTopBar(
             }
 
             if (showSortIcon && onToggleSort != null) {
-                val rotationAngle by animateFloatAsState(
-                    targetValue = 180f,
-                    animationSpec = tween(durationMillis = 300),
-                    label = "SortIconRotation"
-                )
-
                 IconButton(onClick = onToggleSort) {
                     Icon(
                         imageVector = Icons.Default.Sort,
