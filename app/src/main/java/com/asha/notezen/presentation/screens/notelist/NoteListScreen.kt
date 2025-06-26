@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.asha.notezen.presentation.navigation.Screen
+import com.asha.notezen.presentation.screens.common.SearchableNoteList
 import com.asha.notezen.presentation.screens.composables.CommonTopBar
 import com.asha.notezen.presentation.screens.notelist.composables.EmptyStateMessage
 import com.asha.notezen.presentation.screens.notelist.composables.FABColumn
@@ -54,6 +55,10 @@ fun NoteListScreen(
         derivedStateOf { listState.firstVisibleItemIndex > 3 }
     }
 
+    val isSearching by remember {
+        derivedStateOf { searchQuery.isNotBlank() }
+    }
+
     LaunchedEffect(uiState.notes.size) {
         viewModel.hideSortSection()
         if (uiState.notes.isNotEmpty() && uiState.notes.size > previousSize.intValue) {
@@ -71,15 +76,17 @@ fun NoteListScreen(
 
     Scaffold(
         floatingActionButton = {
-            FABColumn(
-                showScrollToTop = showScrollToTop,
-                onScrollToTop = {
-                    scope.launch { listState.animateScrollToItem(0) }
-                },
-                onAddNote = {
-                    navController.navigate(Screen.AddNote.route)
-                }
-            )
+            if (!isSearching) {
+                FABColumn(
+                    showScrollToTop = showScrollToTop,
+                    onScrollToTop = {
+                        scope.launch { listState.animateScrollToItem(0) }
+                    },
+                    onAddNote = {
+                        navController.navigate(Screen.AddNote.route)
+                    }
+                )
+            }
         }
     )
     { innerPadding ->
@@ -121,38 +128,55 @@ fun NoteListScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (uiState.notes.isEmpty()) {
-                EmptyStateMessage()
+            if (isSearching) {
+                SearchableNoteList(
+                    notes = uiState.notes,
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = viewModel::onSearchQueryChanged,
+                    onClick = { note ->
+                        navController.navigate(Screen.AddNote.passNoteId(note.id))
+                    },
+                    onDelete = viewModel::deleteNote,
+                    onToggleArchive = viewModel::archiveNote,
+                    onTogglePin = viewModel::togglePin,
+                    showFAB = false,
+                    showPinIcon = true,
+                    onAddNote = null // not needed in search
+                )
             } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    NoteSection(
-                        title = "Pinned",
-                        notes = pinnedNotes,
-                        onClick = { note ->
-                            navController.navigate(Screen.AddNote.passNoteId(note.id))
-                        },
-                        onDelete = viewModel::deleteNote,
-                        onTogglePin = viewModel::togglePin,
-                        onArchive = viewModel::archiveNote
-                    )
+                if (uiState.notes.isEmpty()) {
+                    EmptyStateMessage()
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        NoteSection(
+                            title = "Pinned",
+                            notes = pinnedNotes,
+                            onClick = { note ->
+                                navController.navigate(Screen.AddNote.passNoteId(note.id))
+                            },
+                            onDelete = viewModel::deleteNote,
+                            onTogglePin = viewModel::togglePin,
+                            onArchive = viewModel::archiveNote
+                        )
 
-                    NoteSection(
-                        title = "Others",
-                        notes = otherNotes,
-                        onClick = { note ->
-                            navController.navigate(Screen.AddNote.passNoteId(note.id))
-                        },
-                        onDelete = viewModel::deleteNote,
-                        onTogglePin = viewModel::togglePin,
-                        onArchive = viewModel::archiveNote
-                    )
+                        NoteSection(
+                            title = "Others",
+                            notes = otherNotes,
+                            onClick = { note ->
+                                navController.navigate(Screen.AddNote.passNoteId(note.id))
+                            },
+                            onDelete = viewModel::deleteNote,
+                            onTogglePin = viewModel::togglePin,
+                            onArchive = viewModel::archiveNote
+                        )
+                    }
+
                 }
-
             }
         }
     }
