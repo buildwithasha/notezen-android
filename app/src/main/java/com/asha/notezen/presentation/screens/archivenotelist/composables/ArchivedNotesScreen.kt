@@ -76,15 +76,7 @@ fun ArchivedNotesScreen(
                 onTogglePin = {},
                 showFAB = false,
                 showPinIcon = false,
-                onAddNote = null,
-                modifier = Modifier
-                    .padding(
-                        top = innerPadding.calculateTopPadding(),
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = innerPadding.calculateBottomPadding()
-                    )
-                    .fillMaxSize()
+                onAddNote = null
             )
 
         }
