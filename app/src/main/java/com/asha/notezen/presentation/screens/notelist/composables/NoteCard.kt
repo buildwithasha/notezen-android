@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Card
@@ -39,7 +38,6 @@ import java.util.Locale
 @Composable
 fun NoteCard(
     note: Note,
-    onDelete: () -> Unit,
     onToggleArchive: (Note) -> Unit,
     onClick: () -> Unit,
     onTogglePin: (Note) -> Unit,
@@ -128,14 +126,6 @@ fun NoteCard(
                             fontSize = 12.sp,
                             color = textColor.copy(alpha = 0.7f),
                             modifier = Modifier.weight(1f)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Note",
-                            tint = textColor.copy(alpha = 0.8f),
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clickable { onDelete() }
                         )
                     }
                 }

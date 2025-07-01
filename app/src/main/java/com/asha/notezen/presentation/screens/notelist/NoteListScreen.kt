@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -51,6 +53,8 @@ fun NoteListScreen(
     val pinnedNotes = uiState.notes.filter { it.isPinned }
     val otherNotes = uiState.notes.filter { !it.isPinned }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     val showScrollToTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 3 }
     }
@@ -75,6 +79,7 @@ fun NoteListScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             if (!isSearching) {
                 FABColumn(
@@ -136,7 +141,6 @@ fun NoteListScreen(
                     onClick = { note ->
                         navController.navigate(Screen.AddNote.passNoteId(note.id))
                     },
-                    onDelete = viewModel::deleteNote,
                     onToggleArchive = viewModel::archiveNote,
                     onTogglePin = viewModel::togglePin,
                     showFAB = false,
@@ -159,7 +163,6 @@ fun NoteListScreen(
                             onClick = { note ->
                                 navController.navigate(Screen.AddNote.passNoteId(note.id))
                             },
-                            onDelete = viewModel::deleteNote,
                             onTogglePin = viewModel::togglePin,
                             onArchive = viewModel::archiveNote
                         )
@@ -170,7 +173,6 @@ fun NoteListScreen(
                             onClick = { note ->
                                 navController.navigate(Screen.AddNote.passNoteId(note.id))
                             },
-                            onDelete = viewModel::deleteNote,
                             onTogglePin = viewModel::togglePin,
                             onArchive = viewModel::archiveNote
                         )

@@ -71,7 +71,6 @@ fun ArchivedNotesScreen(
                 searchQuery = searchQuery,
                 onSearchQueryChange = viewModel::onSearchQueryChanged,
                 onClick = { note -> navController.navigate(Screen.AddNote.passNoteId(note.id)) },
-                onDelete = viewModel::deleteNote,
                 onToggleArchive = viewModel::toggleArchive,
                 onTogglePin = {},
                 showFAB = false,
