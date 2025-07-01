@@ -26,6 +26,9 @@ class NoteListViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
+    private val _recentlyDeletedNote = MutableStateFlow<Note?>(null)
+    val recentlyDeletedNote: StateFlow<Note?> = _recentlyDeletedNote
+
 
     init {
         observeNotes()
@@ -54,8 +57,23 @@ class NoteListViewModel @Inject constructor(
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             noteUseCases.deleteNote(note)
+            _recentlyDeletedNote.value = note
         }
     }
+
+    fun clearRecentlyDeletedNote() {
+        _recentlyDeletedNote.value = null
+    }
+
+    fun restoreDeletedNote() {
+        viewModelScope.launch {
+            recentlyDeletedNote.value?.let {
+                noteUseCases.addNote(it)
+            }
+            _recentlyDeletedNote.value = null
+        }
+    }
+
 
     fun toggleSortSection() {
         _uiState.update { it.copy(isSortSectionVisible = !it.isSortSectionVisible) }
@@ -65,10 +83,8 @@ class NoteListViewModel @Inject constructor(
         _uiState.update { it.copy(isSortSectionVisible = false) }
     }
 
-
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
-        _uiState.update { it.copy(searchQuery = query) }
     }
 
     fun updateSort(type: SortType? = null, order: SortOrder? = null) {
@@ -94,4 +110,4 @@ class NoteListViewModel @Inject constructor(
             noteUseCases.addNote(archivedNote)
         }
     }
-    }
+}

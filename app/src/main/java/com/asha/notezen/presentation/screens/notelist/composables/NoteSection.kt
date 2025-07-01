@@ -10,13 +10,15 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.asha.notezen.domain.model.Note
+import com.asha.notezen.presentation.screens.common.SwipeToDeleteNoteCard
 
 fun LazyListScope.NoteSection(
     title: String,
     notes: List<Note>,
     onClick: (Note) -> Unit,
     onTogglePin: (Note) -> Unit,
-    onArchive: (Note) -> Unit
+    onArchive: (Note) -> Unit,
+    onDelete: (Note) -> Unit
 ) {
     if (notes.isNotEmpty()) {
         item {
@@ -30,12 +32,14 @@ fun LazyListScope.NoteSection(
             )
         }
 
-        items(notes) { note ->
-            NoteCard(
+        items(notes, key = { it.id }) { note ->
+            SwipeToDeleteNoteCard(
                 note = note,
                 onClick = { onClick(note) },
                 onTogglePin = { onTogglePin(note) },
-                onToggleArchive = {onArchive(note)}
+                onToggleArchive = { onArchive(note) },
+                onDelete = { onDelete(note) },
+                showPinIcon = true
             )
         }
     }

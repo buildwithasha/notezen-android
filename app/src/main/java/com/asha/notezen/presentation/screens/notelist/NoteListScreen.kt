@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,8 +30,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.asha.notezen.domain.model.Note
 import com.asha.notezen.presentation.navigation.Screen
 import com.asha.notezen.presentation.screens.common.SearchableNoteList
+import com.asha.notezen.presentation.screens.common.UndoDeleteSnackbarEffect
 import com.asha.notezen.presentation.screens.composables.CommonTopBar
 import com.asha.notezen.presentation.screens.notelist.composables.EmptyStateMessage
 import com.asha.notezen.presentation.screens.notelist.composables.FABColumn
@@ -54,6 +57,15 @@ fun NoteListScreen(
     val otherNotes = uiState.notes.filter { !it.isPinned }
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val recentlyDeletedNote by viewModel.recentlyDeletedNote.collectAsState()
+
+    UndoDeleteSnackbarEffect(
+        snackbarHostState = snackbarHostState,
+        recentlyDeletedNote = recentlyDeletedNote,
+        onUndo = { viewModel.restoreDeletedNote() },
+        onDismiss = { viewModel.clearRecentlyDeletedNote() }
+    )
+
 
     val showScrollToTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 3 }
@@ -73,6 +85,11 @@ fun NoteListScreen(
 
 
     val focusManager = LocalFocusManager.current
+
+    val onNoteClick: (Note) -> Unit = { note ->
+        navController.navigate(Screen.AddNote.passNoteId(note.id))
+    }
+
     BackHandler(enabled = searchQuery.isNotBlank()) {
         viewModel.onSearchQueryChanged("")
         focusManager.clearFocus(force = true)
@@ -138,14 +155,13 @@ fun NoteListScreen(
                     notes = uiState.notes,
                     searchQuery = searchQuery,
                     onSearchQueryChange = viewModel::onSearchQueryChanged,
-                    onClick = { note ->
-                        navController.navigate(Screen.AddNote.passNoteId(note.id))
-                    },
+                    onClick = onNoteClick,
                     onToggleArchive = viewModel::archiveNote,
                     onTogglePin = viewModel::togglePin,
                     showFAB = false,
                     showPinIcon = true,
-                    onAddNote = null // not needed in search
+                    onAddNote = null,
+                    onDelete = { viewModel.deleteNote(it) }
                 )
             } else {
                 if (uiState.notes.isEmpty()) {
@@ -154,27 +170,25 @@ fun NoteListScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier
-                            .weight(1f)
+                            .fillMaxSize()
                             .padding(horizontal = 16.dp)
                     ) {
                         NoteSection(
                             title = "Pinned",
                             notes = pinnedNotes,
-                            onClick = { note ->
-                                navController.navigate(Screen.AddNote.passNoteId(note.id))
-                            },
+                            onClick = onNoteClick,
                             onTogglePin = viewModel::togglePin,
-                            onArchive = viewModel::archiveNote
+                            onArchive = viewModel::archiveNote,
+                            onDelete = { viewModel.deleteNote(it) }
                         )
 
                         NoteSection(
                             title = "Others",
                             notes = otherNotes,
-                            onClick = { note ->
-                                navController.navigate(Screen.AddNote.passNoteId(note.id))
-                            },
+                            onClick = onNoteClick,
                             onTogglePin = viewModel::togglePin,
-                            onArchive = viewModel::archiveNote
+                            onArchive = viewModel::archiveNote,
+                            onDelete = { viewModel.deleteNote(it) }
                         )
                     }
 

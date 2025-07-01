@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.asha.notezen.domain.model.Note
-import com.asha.notezen.presentation.screens.notelist.composables.NoteCard
 
 @Composable
 fun SearchableNoteList(
@@ -26,10 +25,10 @@ fun SearchableNoteList(
     onClick: (Note) -> Unit,
     onToggleArchive: (Note) -> Unit,
     onTogglePin: (Note) -> Unit,
+    onDelete: (Note) -> Unit,
     showPinIcon: Boolean = true,
     showFAB: Boolean = true,
     onAddNote: (() -> Unit)? = null
-
 ) {
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -48,12 +47,13 @@ fun SearchableNoteList(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    items(notes) { note ->
-                        NoteCard(
+                    items(notes, key = { it.id }) { note ->
+                        SwipeToDeleteNoteCard(
                             note = note,
                             onClick = { onClick(note) },
-                            onTogglePin = { if (showPinIcon) onTogglePin(note) }, // archived screen doesn't show pin
+                            onTogglePin = { if (showPinIcon) onTogglePin(note) },
                             onToggleArchive = { onToggleArchive(note) },
+                            onDelete = { onDelete(note) },
                             showPinIcon = showPinIcon
                         )
                     }

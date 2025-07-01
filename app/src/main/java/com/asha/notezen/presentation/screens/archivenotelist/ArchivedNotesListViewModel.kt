@@ -21,6 +21,9 @@ class ArchivedNotesListViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
+    private val _recentlyDeletedNote = MutableStateFlow<Note?>(null)
+    val recentlyDeletedNote: StateFlow<Note?> = _recentlyDeletedNote
+
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
     }
@@ -41,6 +44,20 @@ class ArchivedNotesListViewModel @Inject constructor(
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             noteUseCases.deleteNote(note)
+            _recentlyDeletedNote.value = note
+        }
+    }
+
+    fun clearRecentlyDeletedNote() {
+        _recentlyDeletedNote.value = null
+    }
+
+    fun restoreDeletedNote() {
+        viewModelScope.launch {
+            recentlyDeletedNote.value?.let {
+                noteUseCases.addNote(it)
+            }
+            _recentlyDeletedNote.value = null
         }
     }
 
