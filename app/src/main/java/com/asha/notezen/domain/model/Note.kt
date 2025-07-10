@@ -4,6 +4,8 @@ data class Note(
     val id: Int = 0,
     val title: String,
     val content: String,
+    val noteType: NoteType = NoteType.TEXT,
+    val checklistItems: List<ChecklistItem> = emptyList(),
     val timestamp: Long,
     val colorHex: String,
     val isPinned: Boolean = false,

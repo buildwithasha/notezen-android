@@ -91,6 +91,9 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore)
 
+    //Gson
+    implementation(libs.gson)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

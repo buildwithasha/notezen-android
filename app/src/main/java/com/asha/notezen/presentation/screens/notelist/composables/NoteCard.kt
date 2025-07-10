@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Card
@@ -105,7 +106,7 @@ fun NoteCard(
                         }
                     }
 
-                    if (note.content.isNotBlank()) {
+                    if (note.noteType.name == "TEXT" && note.content.isNotBlank()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = note.content,
@@ -113,6 +114,47 @@ fun NoteCard(
                             color = textColor.copy(alpha = 0.95f),
                             maxLines = 6
                         )
+                    }
+
+                    if (note.noteType.name == "CHECKLIST" && note.checklistItems.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        val uncheckedItems = note.checklistItems.filter { !it.isChecked }
+                        val totalItems = note.checklistItems.size
+                        val shownItems = uncheckedItems.take(3)
+                        val shownCount = shownItems.size
+                        val hiddenCount = totalItems - shownCount
+
+                        Column {
+                            shownItems.forEach { item ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckBoxOutlineBlank,
+                                        contentDescription = null,
+                                        tint = textColor.copy(alpha = 0.7f),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = item.text,
+                                        fontSize = 14.sp,
+                                        color = textColor.copy(alpha = 0.95f)
+                                    )
+                                }
+                            }
+
+                            if (hiddenCount > 0) {
+                                Text(
+                                    text = "+ $hiddenCount more",
+                                    fontSize = 13.sp,
+                                    color = textColor.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

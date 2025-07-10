@@ -39,6 +39,9 @@ junit = "4.13.2"
 junitExt = "1.2.0"
 espresso = "3.5.1"
 
+# gson
+gson = "2.10.1"
+
 
 [libraries]
 # Kotlin
@@ -83,6 +86,8 @@ androidx-datastore = { group = "androidx.datastore", name = "datastore-preferenc
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

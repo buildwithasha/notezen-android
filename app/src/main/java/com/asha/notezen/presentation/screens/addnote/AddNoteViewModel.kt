@@ -1,5 +1,6 @@
 package com.asha.notezen.presentation.screens.addnote
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -7,7 +8,9 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.asha.notezen.domain.model.ChecklistItem
 import com.asha.notezen.domain.model.Note
+import com.asha.notezen.domain.model.NoteType
 import com.asha.notezen.domain.usecase.NoteUseCases
 import com.asha.notezen.presentation.ui.theme.noteColors
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +30,8 @@ class AddNoteViewModel @Inject constructor(
     private val _uiState = mutableStateOf(AddNoteUiState())
     val uiState: AddNoteUiState get() = _uiState.value
 
+    val checklistItems = mutableStateListOf<ChecklistItem>()
+
     fun onTitleChanged(newTitle: String) {
         _uiState.value = _uiState.value.copy(title = newTitle)
     }
@@ -39,6 +44,39 @@ class AddNoteViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(selectedColorIndex = index)
     }
 
+    fun addChecklistItem(text: String) {
+        checklistItems.add(0, ChecklistItem(text))
+        sortChecklist()
+    }
+
+    fun removeChecklistItem(index: Int) {
+        if (index in checklistItems.indices) checklistItems.removeAt(index)
+    }
+
+    fun toggleChecklistItem(index: Int) {
+        val item = checklistItems[index]
+        checklistItems[index] = item.copy(isChecked = !item.isChecked)
+        sortChecklist()
+    }
+
+    fun setNoteType(type: NoteType) {
+        _uiState.value = _uiState.value.copy(noteType = type)
+    }
+
+    fun updateChecklistItemText(index: Int, newText: String) {
+        if (index in checklistItems.indices) {
+            checklistItems[index] = checklistItems[index].copy(text = newText)
+        }
+    }
+
+    private fun sortChecklist() {
+        val sorted = checklistItems.sortedWith(
+            compareBy { it.isChecked }
+        )
+        checklistItems.clear()
+        checklistItems.addAll(sorted)
+    }
+
     fun loadNoteIfAvailable() {
         if (noteIdArg != -1 && noteId != noteIdArg) {
             noteId = noteIdArg
@@ -48,10 +86,15 @@ class AddNoteViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         title = it.title,
                         content = it.content,
+                        noteType = it.noteType,
                         selectedColorIndex = noteColors.indexOfFirst { color ->
                             color.toArgb() == Color(it.colorHex.toColorInt()).toArgb()
                         }.takeIf { i -> i != -1 } ?: 0
                     )
+
+                    checklistItems.clear()
+                    checklistItems.addAll(it.checklistItems)
+                    sortChecklist()
                 }
             }
         }
@@ -59,19 +102,35 @@ class AddNoteViewModel @Inject constructor(
 
     fun saveNote() {
         val current = _uiState.value
-        if (current.title.isBlank() && current.content.isBlank()) return
+
+        val isTextNoteEmpty = current.noteType == NoteType.TEXT && current.content.isBlank()
+        val isChecklistNoteEmpty = current.noteType == NoteType.CHECKLIST && checklistItems.isEmpty()
+
+        if (current.title.isBlank() && isTextNoteEmpty || isChecklistNoteEmpty) {
+            return
+        }
 
         val isEditing = noteId != -1
+
         viewModelScope.launch {
+            val existingNote = if (isEditing) {
+                noteUseCases.getNoteById(noteId).firstOrNull()
+            } else null
+
             val note = Note(
                 id = if (isEditing) noteId else 0,
                 title = current.title,
                 content = current.content,
+                noteType = current.noteType,
+                checklistItems = checklistItems.toList(),
                 timestamp = System.currentTimeMillis(),
                 colorHex = String.format(
                     "#%06X",
                     0xFFFFFF and noteColors[current.selectedColorIndex].toArgb()
-                )
+                ),
+                isPinned = existingNote?.isPinned ?: false,
+                isArchived = existingNote?.isArchived ?: false
+
             )
             noteUseCases.addNote(note)
             _uiState.value = current.copy(saveSuccess = true)
