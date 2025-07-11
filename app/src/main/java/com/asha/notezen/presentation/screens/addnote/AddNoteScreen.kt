@@ -250,6 +250,8 @@ fun AddNoteScreen(
 }
 
 fun showDateTimePicker(context: Context, onTimeSelected: (Long) -> Unit) {
+
+    val currentTime = System.currentTimeMillis()
     val calendar = Calendar.getInstance()
     DatePickerDialog(
         context,
@@ -266,16 +268,22 @@ fun showDateTimePicker(context: Context, onTimeSelected: (Long) -> Unit) {
                     date.set(Calendar.HOUR_OF_DAY, hour)
                     date.set(Calendar.MINUTE, minute)
                     date.set(Calendar.SECOND, 0)
-                    onTimeSelected(date.timeInMillis)
+                    if (date.timeInMillis > System.currentTimeMillis()) {
+                        onTimeSelected(date.timeInMillis)
+                    } else {
+                        Toast.makeText(context, "Please select a future time", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),
                 calendar.get(Calendar.MINUTE),
                 false
             ).show()
-
         },
+
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
-    ).show()
+    ).apply {
+        datePicker.minDate = currentTime
+    }.show()
 }

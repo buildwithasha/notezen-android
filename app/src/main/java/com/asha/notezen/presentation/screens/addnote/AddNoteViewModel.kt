@@ -123,11 +123,15 @@ class AddNoteViewModel @Inject constructor(
             viewModelScope.launch {
                 val note = noteUseCases.getNoteById(noteIdArg).firstOrNull()
                 note?.let {
+                    val currentTime = System.currentTimeMillis()
+                    val isReminderExpired = it.reminderTime != null && it.reminderTime < currentTime
+                    val updatedReminderTime = if (isReminderExpired) null else it.reminderTime
+
                     _uiState.value = _uiState.value.copy(
                         title = it.title,
                         content = it.content,
                         noteType = it.noteType,
-                        reminderTime = it.reminderTime,
+                        reminderTime = updatedReminderTime,
                         selectedColorIndex = noteColors.indexOfFirst { color ->
                             color.toArgb() == Color(it.colorHex.toColorInt()).toArgb()
                         }.takeIf { i -> i != -1 } ?: 0
@@ -136,6 +140,10 @@ class AddNoteViewModel @Inject constructor(
                     checklistItems.clear()
                     checklistItems.addAll(it.checklistItems)
                     sortChecklist()
+
+                    if (isReminderExpired) {
+                        noteUseCases.addNote(it.copy(reminderTime = null))
+                    }
                 }
             }
         }
