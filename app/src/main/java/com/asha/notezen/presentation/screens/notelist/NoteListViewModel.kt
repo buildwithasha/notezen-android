@@ -6,6 +6,7 @@ import com.asha.notezen.domain.model.Note
 import com.asha.notezen.domain.usecase.NoteUseCases
 import com.asha.notezen.domain.util.SortOrder
 import com.asha.notezen.domain.util.SortType
+import com.asha.notezen.reminder.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NoteListViewModel @Inject constructor(
-    private val noteUseCases: NoteUseCases
+    private val noteUseCases: NoteUseCases,
+    private val reminderScheduler: ReminderScheduler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NoteListUiState())
@@ -56,6 +58,10 @@ class NoteListViewModel @Inject constructor(
 
     fun deleteNote(note: Note) {
         viewModelScope.launch {
+
+            if (note.reminderTime != null) {
+                reminderScheduler.cancel(note.id)
+            }
             noteUseCases.deleteNote(note)
             _recentlyDeletedNote.value = note
         }
@@ -67,8 +73,12 @@ class NoteListViewModel @Inject constructor(
 
     fun restoreDeletedNote() {
         viewModelScope.launch {
-            recentlyDeletedNote.value?.let {
-                noteUseCases.addNote(it)
+            recentlyDeletedNote.value?.let { note ->
+                noteUseCases.addNote(note)
+
+                if (note.reminderTime != null && note.reminderTime > System.currentTimeMillis()) {
+                    reminderScheduler.schedule(note)
+                }
             }
             _recentlyDeletedNote.value = null
         }

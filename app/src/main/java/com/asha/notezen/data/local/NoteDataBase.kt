@@ -7,7 +7,7 @@ import com.asha.notezen.data.local.converters.ChecklistConverter
 import com.asha.notezen.data.local.dao.NoteDao
 import com.asha.notezen.data.local.entity.NoteEntity
 
-@Database(entities = [NoteEntity::class], version = 4, exportSchema = true)
+@Database(entities = [NoteEntity::class], version = 1, exportSchema = true)
 @TypeConverters(ChecklistConverter::class)
 
 abstract class NoteDataBase : RoomDatabase() {

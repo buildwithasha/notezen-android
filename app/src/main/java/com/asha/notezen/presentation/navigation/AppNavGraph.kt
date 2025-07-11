@@ -1,23 +1,25 @@
 package com.asha.notezen.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.asha.notezen.presentation.screens.addnote.AddNoteScreen
+import com.asha.notezen.presentation.screens.addnote.AddNoteViewModel
 import com.asha.notezen.presentation.screens.archivenotelist.composables.ArchivedNotesScreen
 import com.asha.notezen.presentation.screens.notelist.NoteListScreen
 
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(navController: NavHostController, startDestination: String) {
     NavHost(
         navController = navController,
-        startDestination = Screen.NoteList.route
-    ) {
-        // Note List Screen
+        startDestination = startDestination
+    )
+    {
         composable(Screen.NoteList.route) {
             NoteListScreen(navController = navController)
         }
@@ -30,8 +32,9 @@ fun AppNavGraph(navController: NavHostController) {
                     defaultValue = -1
                 }
             )
-        ) {
-            AddNoteScreen(navController = navController)
+        ) { backStackEntry ->
+            val viewModel: AddNoteViewModel = hiltViewModel(backStackEntry)
+            AddNoteScreen(navController = navController, viewModel = viewModel)
         }
 
         composable(Screen.ArchivedNotes.route) {

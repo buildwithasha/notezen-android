@@ -1,5 +1,7 @@
 package com.asha.notezen.presentation.screens.addnote
 
+import android.content.Context
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -13,7 +15,11 @@ import com.asha.notezen.domain.model.Note
 import com.asha.notezen.domain.model.NoteType
 import com.asha.notezen.domain.usecase.NoteUseCases
 import com.asha.notezen.presentation.ui.theme.noteColors
+import com.asha.notezen.reminder.ReminderScheduler
+import com.asha.notezen.reminder.canScheduleExactAlarms
+import com.asha.notezen.reminder.openExactAlarmPermissionSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,8 +27,13 @@ import javax.inject.Inject
 @HiltViewModel
 class AddNoteViewModel @Inject constructor(
     private val noteUseCases: NoteUseCases,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val reminderScheduler: ReminderScheduler,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    private val _showExactAlarmPermissionDialog = mutableStateOf(false)
+    val showExactAlarmPermissionDialog: State<Boolean> = _showExactAlarmPermissionDialog
 
     private val noteIdArg: Int = savedStateHandle["noteId"] ?: -1
     private var noteId = -1
@@ -77,6 +88,35 @@ class AddNoteViewModel @Inject constructor(
         checklistItems.addAll(sorted)
     }
 
+    fun showReminderSheet(show: Boolean) {
+        _uiState.value = _uiState.value.copy(isReminderSheetVisible = show)
+    }
+
+    fun setReminderTime(timestamp: Long?) {
+        _uiState.value = _uiState.value.copy(reminderTime = timestamp)
+    }
+
+    fun tryScheduleReminder(note: Note) {
+        if (!canScheduleExactAlarms(context)) {
+            _showExactAlarmPermissionDialog.value = true
+            return
+        }
+
+        try {
+            reminderScheduler.schedule(note)
+        } catch (e: SecurityException) {
+            _showExactAlarmPermissionDialog.value = true
+        }
+    }
+
+    fun onExactAlarmPermissionDialogDismissed() {
+        _showExactAlarmPermissionDialog.value = false
+    }
+
+    fun onOpenExactAlarmSettings() {
+        openExactAlarmPermissionSettings(context)
+    }
+
     fun loadNoteIfAvailable() {
         if (noteIdArg != -1 && noteId != noteIdArg) {
             noteId = noteIdArg
@@ -87,6 +127,7 @@ class AddNoteViewModel @Inject constructor(
                         title = it.title,
                         content = it.content,
                         noteType = it.noteType,
+                        reminderTime = it.reminderTime,
                         selectedColorIndex = noteColors.indexOfFirst { color ->
                             color.toArgb() == Color(it.colorHex.toColorInt()).toArgb()
                         }.takeIf { i -> i != -1 } ?: 0
@@ -117,6 +158,15 @@ class AddNoteViewModel @Inject constructor(
                 noteUseCases.getNoteById(noteId).firstOrNull()
             } else null
 
+            val newReminderTime = current.reminderTime
+            val existingReminderTime = existingNote?.reminderTime
+
+            if (existingReminderTime != null && newReminderTime == null) {
+                reminderScheduler.cancel(existingNote.id)
+            } else if (existingReminderTime != null && existingReminderTime != newReminderTime) {
+                reminderScheduler.cancel(existingNote.id)
+            }
+
             val note = Note(
                 id = if (isEditing) noteId else 0,
                 title = current.title,
@@ -129,11 +179,18 @@ class AddNoteViewModel @Inject constructor(
                     0xFFFFFF and noteColors[current.selectedColorIndex].toArgb()
                 ),
                 isPinned = existingNote?.isPinned ?: false,
-                isArchived = existingNote?.isArchived ?: false
+                isArchived = existingNote?.isArchived ?: false,
+                reminderTime = newReminderTime
 
             )
+
             noteUseCases.addNote(note)
+            if (newReminderTime != null) {
+                tryScheduleReminder(note)
+            }
             _uiState.value = current.copy(saveSuccess = true)
+
+
         }
     }
 }

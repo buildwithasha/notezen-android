@@ -9,5 +9,6 @@ data class Note(
     val timestamp: Long,
     val colorHex: String,
     val isPinned: Boolean = false,
-    val isArchived: Boolean = false
+    val isArchived: Boolean = false,
+    val reminderTime: Long? = null
 )

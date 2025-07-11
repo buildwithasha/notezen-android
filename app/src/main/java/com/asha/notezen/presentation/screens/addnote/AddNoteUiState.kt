@@ -7,5 +7,7 @@ data class AddNoteUiState(
     val content: String = "",
     val selectedColorIndex: Int = 0,
     val noteType: NoteType = NoteType.TEXT,
-    val saveSuccess: Boolean = false
+    val saveSuccess: Boolean = false,
+    val reminderTime: Long? = null,
+    val isReminderSheetVisible: Boolean = false
 )
