@@ -20,6 +20,8 @@ import com.asha.notezen.reminder.canScheduleExactAlarms
 import com.asha.notezen.reminder.openExactAlarmPermissionSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,6 +36,9 @@ class AddNoteViewModel @Inject constructor(
 
     private val _showExactAlarmPermissionDialog = mutableStateOf(false)
     val showExactAlarmPermissionDialog: State<Boolean> = _showExactAlarmPermissionDialog
+
+    private val _isEditMode = MutableStateFlow(false)
+    val isEditMode: StateFlow<Boolean> = _isEditMode
 
     private val noteIdArg: Int = savedStateHandle["noteId"] ?: -1
     private var noteId = -1
@@ -119,6 +124,7 @@ class AddNoteViewModel @Inject constructor(
 
     fun loadNoteIfAvailable() {
         if (noteIdArg != -1 && noteId != noteIdArg) {
+            _isEditMode.value = true
             noteId = noteIdArg
             viewModelScope.launch {
                 val note = noteUseCases.getNoteById(noteIdArg).firstOrNull()

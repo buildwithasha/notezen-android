@@ -39,6 +39,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +68,7 @@ fun AddNoteScreen(
     viewModel: AddNoteViewModel = hiltViewModel()
 ) {
     val state = viewModel.uiState
+    val isEditMode by viewModel.isEditMode.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadNoteIfAvailable()
@@ -132,7 +135,8 @@ fun AddNoteScreen(
 
             NoteTypeToggle(
                 selectedType = state.noteType,
-                onTypeSelected = viewModel::setNoteType
+                onTypeSelected = viewModel::setNoteType,
+                enabled = !isEditMode
             )
 
             Spacer(modifier = Modifier.height(12.dp))

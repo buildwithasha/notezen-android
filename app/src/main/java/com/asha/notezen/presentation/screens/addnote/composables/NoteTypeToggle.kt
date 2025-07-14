@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -17,10 +18,12 @@ import com.asha.notezen.domain.model.NoteType
 fun NoteTypeToggle(
     selectedType: NoteType,
     onTypeSelected: (NoteType) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = modifier
+            .alpha(if (enabled) 1f else 0.5f)
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
@@ -34,7 +37,8 @@ fun NoteTypeToggle(
         val textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
 
         TextButton(
-            onClick = { onTypeSelected(NoteType.TEXT) },
+            onClick = { if (enabled) onTypeSelected(NoteType.TEXT) },
+            enabled = enabled,
             modifier = buttonModifier,
             colors = ButtonDefaults.textButtonColors(
                 contentColor = if (selectedType == NoteType.TEXT) selectedColor else unselectedColor
@@ -48,7 +52,8 @@ fun NoteTypeToggle(
         }
 
         TextButton(
-            onClick = { onTypeSelected(NoteType.CHECKLIST) },
+            onClick = { if (enabled) onTypeSelected(NoteType.CHECKLIST) },
+            enabled = enabled,
             modifier = buttonModifier,
             colors = ButtonDefaults.textButtonColors(
                 contentColor = if (selectedType == NoteType.CHECKLIST) selectedColor else unselectedColor
