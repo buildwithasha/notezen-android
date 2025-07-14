@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.DismissDirection
@@ -47,11 +48,19 @@ fun SwipeToDeleteNoteCard(
         state = dismissState,
         directions = setOf(DismissDirection.EndToStart),
         background = {
-            val color = if (dismissState.targetValue == DismissValue.DismissedToStart) Color.Red else Color.Transparent
+            val targetColor = if (dismissState.targetValue == DismissValue.DismissedToStart)
+                Color(0xFF4CAF50)
+            else
+                Color(0xFF4CAF50).copy(alpha = 0.8f)
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color)
+                    .padding(vertical = 8.dp)
+                    .background(
+                        color = targetColor,
+                        shape = RoundedCornerShape(cornerRadius)
+                    )
                     .padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
