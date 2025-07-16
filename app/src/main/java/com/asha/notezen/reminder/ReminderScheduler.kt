@@ -7,6 +7,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
 import com.asha.notezen.domain.model.Note
+import com.asha.notezen.utils.ReminderConstants.EXTRA_NOTE_CONTENT
+import com.asha.notezen.utils.ReminderConstants.EXTRA_NOTE_ID
+import com.asha.notezen.utils.ReminderConstants.EXTRA_NOTE_TITLE
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -18,9 +21,10 @@ class ReminderScheduler @Inject constructor(
         if (note.reminderTime == null) return
 
         val intent = Intent(context, ReminderReceiver::class.java).apply {
-            putExtra("noteId", note.id)
-            putExtra("title", note.title)
-            putExtra("content", note.content)
+            putExtra(EXTRA_NOTE_ID, note.id)
+            putExtra(EXTRA_NOTE_TITLE, note.title)
+            putExtra(EXTRA_NOTE_CONTENT, note.content)
+
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -39,7 +43,7 @@ class ReminderScheduler @Inject constructor(
                 pendingIntent
             )
         } catch (e: SecurityException) {
-            //trigger exact alarm dialog from ViewModel
+            throw e
         }
     }
 

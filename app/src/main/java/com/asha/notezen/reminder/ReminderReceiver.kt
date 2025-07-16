@@ -11,15 +11,18 @@ import com.asha.notezen.R
 import android.app.PendingIntent
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import com.asha.notezen.utils.ReminderConstants.EXTRA_NOTE_CONTENT
+import com.asha.notezen.utils.ReminderConstants.EXTRA_NOTE_ID
+import com.asha.notezen.utils.ReminderConstants.EXTRA_NOTE_TITLE
 
 class ReminderReceiver : BroadcastReceiver() {
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("ReminderReceiver", "Alarm received for noteId: ${intent.getIntExtra("noteId", -1)}")
 
-        val noteId = intent.getIntExtra("noteId", -1)
-        val title = intent.getStringExtra("title") ?: "Reminder"
-        val content = intent.getStringExtra("content") ?: ""
+        val noteId = intent.getIntExtra(EXTRA_NOTE_ID, -1)
+        val title = intent.getStringExtra(EXTRA_NOTE_TITLE) ?: "Reminder"
+        val content = intent.getStringExtra(EXTRA_NOTE_CONTENT) ?: ""
 
         val openIntent = Intent(context, MainActivity::class.java).apply {
             putExtra("noteId", noteId)
