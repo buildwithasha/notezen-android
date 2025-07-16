@@ -37,6 +37,8 @@ class AddNoteViewModel @Inject constructor(
     private val _showExactAlarmPermissionDialog = mutableStateOf(false)
     val showExactAlarmPermissionDialog: State<Boolean> = _showExactAlarmPermissionDialog
 
+    val shouldNavigateBack = mutableStateOf(false)
+
     private val _isEditMode = MutableStateFlow(false)
     val isEditMode: StateFlow<Boolean> = _isEditMode
 
@@ -47,6 +49,21 @@ class AddNoteViewModel @Inject constructor(
     val uiState: AddNoteUiState get() = _uiState.value
 
     val checklistItems = mutableStateListOf<ChecklistItem>()
+
+    private var _pendingNoteToSave: Note? = null
+    private var _pendingIsEditing: Boolean = false
+
+    private val _returnedFromSettings = MutableStateFlow(false)
+    val returnedFromSettings: StateFlow<Boolean> = _returnedFromSettings
+
+    fun onOpenExactAlarmSettings() {
+        openExactAlarmPermissionSettings(context)
+        _returnedFromSettings.value = true
+    }
+
+    fun resetReturnedFromSettingsFlag() {
+        _returnedFromSettings.value = false
+    }
 
     fun onTitleChanged(newTitle: String) {
         _uiState.value = _uiState.value.copy(title = newTitle)
@@ -101,25 +118,8 @@ class AddNoteViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(reminderTime = timestamp)
     }
 
-    fun tryScheduleReminder(note: Note) {
-        if (!canScheduleExactAlarms(context)) {
-            _showExactAlarmPermissionDialog.value = true
-            return
-        }
-
-        try {
-            reminderScheduler.schedule(note)
-        } catch (e: SecurityException) {
-            _showExactAlarmPermissionDialog.value = true
-        }
-    }
-
     fun onExactAlarmPermissionDialogDismissed() {
         _showExactAlarmPermissionDialog.value = false
-    }
-
-    fun onOpenExactAlarmSettings() {
-        openExactAlarmPermissionSettings(context)
     }
 
     fun loadNoteIfAvailable() {
@@ -159,27 +159,15 @@ class AddNoteViewModel @Inject constructor(
         val current = _uiState.value
 
         val isTextNoteEmpty = current.noteType == NoteType.TEXT && current.content.isBlank()
-        val isChecklistNoteEmpty = current.noteType == NoteType.CHECKLIST && checklistItems.isEmpty()
+        val isChecklistNoteEmpty =
+            current.noteType == NoteType.CHECKLIST && checklistItems.isEmpty()
 
-        if (current.title.isBlank() && isTextNoteEmpty || isChecklistNoteEmpty) {
-            return
-        }
+        if (current.title.isBlank() && isTextNoteEmpty || isChecklistNoteEmpty) return
 
         val isEditing = noteId != -1
-
         viewModelScope.launch {
-            val existingNote = if (isEditing) {
-                noteUseCases.getNoteById(noteId).firstOrNull()
-            } else null
-
-            val newReminderTime = current.reminderTime
-            val existingReminderTime = existingNote?.reminderTime
-
-            if (existingReminderTime != null && newReminderTime == null) {
-                reminderScheduler.cancel(existingNote.id)
-            } else if (existingReminderTime != null && existingReminderTime != newReminderTime) {
-                reminderScheduler.cancel(existingNote.id)
-            }
+            val existingNote =
+                if (isEditing) noteUseCases.getNoteById(noteId).firstOrNull() else null
 
             val note = Note(
                 id = if (isEditing) noteId else 0,
@@ -194,17 +182,50 @@ class AddNoteViewModel @Inject constructor(
                 ),
                 isPinned = existingNote?.isPinned ?: false,
                 isArchived = existingNote?.isArchived ?: false,
-                reminderTime = newReminderTime
-
+                reminderTime = current.reminderTime
             )
 
-            noteUseCases.addNote(note)
-            if (newReminderTime != null) {
-                tryScheduleReminder(note)
+            if (note.reminderTime != null && !canScheduleExactAlarms(context)) {
+                _pendingNoteToSave = note.copy()
+                _pendingIsEditing = isEditing
+                _showExactAlarmPermissionDialog.value = true
+                return@launch
             }
-            _uiState.value = current.copy(saveSuccess = true)
 
-
+            saveNoteAndSchedule(note, isEditing)
         }
     }
+
+    private suspend fun saveNoteAndSchedule(note: Note, isEditing: Boolean) {
+        val noteId = if (isEditing) {
+            noteUseCases.addNote(note)
+            note.id
+        } else {
+            noteUseCases.addNote(note).toInt()
+        }
+
+        val finalNote = note.copy(id = noteId)
+
+        if (finalNote.reminderTime != null) {
+            try {
+                reminderScheduler.schedule(finalNote)
+            } catch (e: SecurityException) {
+                _showExactAlarmPermissionDialog.value = true
+                return
+            }
+        }
+
+        shouldNavigateBack.value = true
+    }
+
+    fun onReturnFromSettings() {
+        viewModelScope.launch {
+            if (_pendingNoteToSave != null && canScheduleExactAlarms(context)) {
+                saveNoteAndSchedule(_pendingNoteToSave!!, _pendingIsEditing)
+                _pendingNoteToSave = null
+                _pendingIsEditing = false
+            }
+        }
+    }
+
 }

@@ -18,7 +18,7 @@ class GetNotesUseCase(private val repository: NoteRepository) {
 }
 
 class AddNoteUseCase(private val repository: NoteRepository) {
-    suspend operator fun invoke(note: Note) = repository.insertNote(note)
+    suspend operator fun invoke(note: Note): Long = repository.insertNote(note)
 }
 
 class DeleteNoteUseCase(private val repository: NoteRepository) {

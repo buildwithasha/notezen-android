@@ -17,8 +17,8 @@ class NoteRepositoryImpl @Inject constructor(
         dao.getNotesOrderedWithPinned().map { it.map { entity -> entity.toDomain() } }
 
 
-    override suspend fun insertNote(note: Note) {
-        dao.insertNote(note.toEntity())
+    override suspend fun insertNote(note: Note): Long {
+        return dao.insertNote(note.toEntity())
     }
 
     override suspend fun deleteNote(note: Note) {

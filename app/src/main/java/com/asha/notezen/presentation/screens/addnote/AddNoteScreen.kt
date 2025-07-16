@@ -69,6 +69,15 @@ fun AddNoteScreen(
 ) {
     val state = viewModel.uiState
     val isEditMode by viewModel.isEditMode.collectAsState()
+    val shouldNavigateBack by viewModel.shouldNavigateBack
+    val returnedFromSettings by viewModel.returnedFromSettings.collectAsState()
+
+    LaunchedEffect(returnedFromSettings) {
+        if (returnedFromSettings) {
+            viewModel.onReturnFromSettings()
+            viewModel.resetReturnedFromSettingsFlag()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadNoteIfAvailable()
@@ -95,9 +104,10 @@ fun AddNoteScreen(
     }
 
 
-    if (state.saveSuccess) {
-        LaunchedEffect(Unit) {
+    LaunchedEffect(shouldNavigateBack) {
+        if (shouldNavigateBack) {
             navController.popBackStack()
+            viewModel.shouldNavigateBack.value = false
         }
     }
 

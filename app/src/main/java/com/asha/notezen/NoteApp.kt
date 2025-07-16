@@ -21,7 +21,7 @@ class NoteApp: Application() {
                 "Reminders",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Reminder notifications for your notes"
+                description = "Used for note reminder alerts"
             }
 
             val manager = context.getSystemService(NotificationManager::class.java)
